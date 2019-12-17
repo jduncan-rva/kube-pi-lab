@@ -1,0 +1,6 @@
+---
+# vars file for docker
+
+docker_pkgs:
+- docker-ce
+- cgroupfs-mount

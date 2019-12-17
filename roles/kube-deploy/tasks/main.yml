@@ -1,0 +1,54 @@
+---
+# tasks file for kube-deploy
+# Inspiration & based on: https://github.com/kairen/kubeadm-ansible 
+
+- name: Reset Kubernetes component
+  shell: "kubeadm reset --force"
+  register: reset_cluster
+
+- name: Init Kubernetes cluster
+  when: reset_cluster is succeeded
+  shell: |
+    kubeadm init --service-cidr {{ service_cidr }} \
+                 --pod-network-cidr {{ pod_network_cidr }} \
+                 --token {{ token }} \
+  register: init_cluster
+
+- name: Make sure no old kube configs exist
+  file:
+    path: "{{ lookup('env','HOME') }}/.kube"
+    state: absent
+
+- name: Create Kubernetes config directory
+  file:
+    path: /root/.kube/
+    state: directory
+
+# - name: Copy admin.conf to Home directory
+#   when: init_cluster is succeeded
+#   command: "cp -i /etc/kubernetes/admin.conf /root/.kube/config"
+
+- name: Tell kubernetes to look to the right auth key
+  lineinfile: 
+    path: /root/.profile
+    line: export KUBECONFIG=/etc/kubernetes/admin.conf
+    create: yes
+
+- name: Deploy Calico SDN
+  shell: | 
+    kubectl apply -f https://docs.projectcalico.org/v{{ calico_version }}/manifests/calico.yaml
+  when: init_cluster is succeeded
+
+# https://twitter.com/alexbrand/status/1178768251024760833?s=20
+- name: workaround for Calico image sysconfig weirdness
+  shell: |
+    kubectl -n kube-system set env daemonset/calico-node FELIX_IGNORELOOSERPF=true
+  when: init_cluster is succeeded
+
+- name: Enable and check kubelet service
+  systemd:
+    name: kubelet
+    daemon_reload: yes
+    state: started
+    enabled: yes
+  register: started_kubelet

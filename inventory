@@ -1,0 +1,8 @@
+[lab]
+kube[01:04].int.jduncan.io ansible_user=ubuntu
+
+[control]
+kube01.int.jduncan.io ansible_user=ubuntu
+
+[nodes]
+kube[02:04].int.jduncan.io ansible_user=ubuntu

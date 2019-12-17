@@ -1,0 +1,6 @@
+---
+# vars file for kube
+kube_pkgs:
+- kubelet
+- kubeadm
+- kubectl

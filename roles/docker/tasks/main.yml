@@ -1,0 +1,25 @@
+---
+# tasks file for docker
+# reference to get repos functional for RPi - https://withblue.ink/2019/07/13/yes-you-can-run-docker-on-raspbian.html
+
+- name: install Docker apt key 
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+
+- name: install Docker repository 
+  apt_repository: 
+    repo: deb https://download.docker.com/linux/ubuntu disco stable
+    state: present
+
+- name: install Docker 
+  apt: 
+    name: '{{ docker_pkgs }}'
+    state: present
+    update_cache: yes
+    install_recommends: no
+
+- name: start Docker service 
+  service: 
+    name: docker 
+    state: started
+    enabled: yes

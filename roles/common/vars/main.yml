@@ -1,0 +1,16 @@
+---
+# vars file for common
+
+iptables_legacy_bins:
+- iptables
+- ip6tables
+# - arptables
+# - ebtables
+
+pkg_deps:
+- apt-transport-https
+- curl
+- ca-certificates
+- curl
+- gnupg2
+- software-properties-common

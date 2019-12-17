@@ -1,0 +1,20 @@
+---
+- hosts: lab
+  become: yes
+  roles:
+  - common
+  - docker
+  - kube
+
+- hosts: control
+  become: yes 
+  roles:
+  - kube-deploy
+
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+
+- hosts: nodes
+  become: yes
+  roles: 
+  - node-join

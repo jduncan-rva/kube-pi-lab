@@ -1,0 +1,29 @@
+---
+# tasks file for common
+
+- name: Confirm an up-to-date apt cache is on the system
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: update core packages 
+  apt:
+    name: '*'
+    state: latest
+  notify: reboot server
+
+# per docs at https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#ensure-iptables-tooling-does-not-use-the-nftables-backend
+- name: ensure iptables is using legacy mode binaries
+  alternatives:
+    name: '{{ item }}'
+    path: /usr/sbin/{{ item }}-legacy
+  with_items: '{{ iptables_legacy_bins }}'
+
+# https://wiki.ubuntu.com/ARM/RaspberryPi#Raspberry_Pi_packages
+- name: add memory cgroup config to boot params
+  replace:
+    path: /boot/firmware/nobtcmd.txt
+    regexp: '(fixrtc)$'
+    replace: '\1 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory'
+  notify: reboot server
+

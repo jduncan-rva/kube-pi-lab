@@ -1,0 +1,21 @@
+---
+# tasks file for kube
+- name: add Kube repo apt signing key 
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+- name: add Kube repository
+  apt_repository: 
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+
+- name: install Kube packages
+  apt: 
+    update-cache: yes 
+    pkg: '{{ kube_pkgs }}'
+
+- name: mark Kube packages as hold
+  dpkg_selections:
+    name: '{{ item }}'
+    selection: hold
+  with_items: '{{ kube_pkgs }}'
